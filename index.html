@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orrery — AI Automation, Engineered for Precision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080706;
+    --bg2: #100F0D;
+    --bg3: #181613;
+    --gold: #C9A84C;
+    --gold-dim: #8C7234;
+    --gold-glow: rgba(201,168,76,0.12);
+    --cream: #F0E8D8;
+    --muted: #6B6459;
+    --border: rgba(201,168,76,0.15);
+    --text: #EDE5D6;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    background: rgba(8,7,6,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+
+  nav a.nav-cta {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    border: 1px solid var(--gold-dim);
+    padding: 0.5rem 1.25rem;
+    border-radius: 2px;
+    transition: background 0.25s, color 0.25s;
+  }
+  nav a.nav-cta:hover { background: var(--gold); color: var(--bg); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 6rem;
+    position: relative;
+  }
+
+  /* Orbital ring decoration */
+  .orbital-bg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .ring-1 { width: 300px; height: 300px; animation: spin 28s linear infinite; }
+  .ring-2 { width: 520px; height: 520px; animation: spin 44s linear infinite reverse; border-color: rgba(201,168,76,0.07); }
+  .ring-3 { width: 740px; height: 740px; animation: spin 60s linear infinite; border-color: rgba(201,168,76,0.05); }
+  .ring-4 { width: 980px; height: 980px; border-color: rgba(201,168,76,0.03); animation: spin 80s linear infinite reverse; }
+
+  .dot {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    top: 50%; left: 50%;
+    transform-origin: 0 0;
+  }
+  .dot-1 { margin-top: -150px; margin-left: -2.5px; animation: dot-spin 28s linear infinite; box-shadow: 0 0 8px var(--gold); }
+  .dot-2 { margin-top: -260px; margin-left: -2.5px; animation: dot-spin 44s linear infinite reverse; opacity: 0.6; width: 4px; height: 4px; }
+  .dot-3 { margin-top: -370px; margin-left: -2.5px; animation: dot-spin 60s linear infinite; opacity: 0.4; width: 3px; height: 3px; }
+
+  @keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+  @keyframes dot-spin { from { transform: rotate(0deg) translateY(-1px); } to { transform: rotate(360deg) translateY(-1px); } }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.75rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    font-weight: 300;
+    line-height: 1.0;
+    color: var(--cream);
+    letter-spacing: -0.01em;
+    max-width: 820px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.4s forwards;
+    margin-bottom: 1.5rem;
+  }
+  h1 em { font-style: italic; color: var(--gold); }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 480px;
+    font-weight: 300;
+    line-height: 1.75;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.6s forwards;
+    margin-bottom: 3rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WAITLIST FORM */
+  .waitlist-wrap {
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.8s forwards;
+  }
+  .waitlist-form {
+    display: flex;
+    gap: 0;
+    max-width: 460px;
+    margin: 0 auto 1rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+    transition: border-color 0.3s;
+  }
+  .waitlist-form:focus-within { border-color: var(--gold-dim); }
+
+  .waitlist-form input[type="email"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.85rem 1.25rem;
+    font-weight: 300;
+  }
+  .waitlist-form input::placeholder { color: var(--muted); }
+
+  .waitlist-form button {
+    background: var(--gold);
+    border: none;
+    color: #080706;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .waitlist-form button:hover { background: #DDB85A; }
+  .waitlist-form button:active { transform: scale(0.98); }
+
+  .waitlist-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .waitlist-count {
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .success-msg {
+    display: none;
+    padding: 1rem 2rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 0.9rem;
+    color: var(--gold);
+    background: var(--gold-glow);
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+  .divider-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* SECTION */
+  section { padding: 7rem 2rem; }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+  }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--cream);
+    max-width: 620px;
+    margin-bottom: 1.5rem;
+  }
+  h2 em { font-style: italic; color: var(--gold); }
+
+  .section-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 4rem;
+  }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--bg2);
+    padding: 2.5rem 2rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .feature-card:hover { background: var(--bg3); }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .feature-icon {
+    width: 36px; height: 36px;
+    margin-bottom: 1.25rem;
+    opacity: 0.7;
+  }
+
+  h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .feature-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--border);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .step:hover .step-num { color: var(--gold-dim); }
+  .step-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .step-content p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 480px;
+  }
+
+  /* STATS */
+  .stats-section {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0;
+    background: var(--border);
+  }
+  .stat {
+    background: var(--bg2);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-num span { color: var(--gold); }
+  .stat-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* USE CASES */
+  .use-cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .use-case {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1.5rem;
+    background: transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .use-case:hover { border-color: var(--gold-dim); background: var(--gold-glow); }
+  .use-case-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+  .use-case h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 0.4rem;
+  }
+  .use-case p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* FINAL CTA */
+  .cta-section {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .footer-logo span { color: var(--gold-dim); }
+  footer p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    nav { padding: 1.25rem 1.5rem; }
+    footer { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+    .waitlist-form { flex-direction: column; }
+    .waitlist-form input[type="email"] { border-bottom: 1px solid var(--border); }
+    .step { grid-template-columns: 1fr; gap: 0.5rem; }
+    .step-num { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#" class="logo">Orrery<span>.</span></a>
+  <a href="#waitlist-bottom" class="nav-cta">Join Waitlist</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orbital-bg">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div class="ring ring-4"></div>
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+  </div>
+
+  <p class="eyebrow">AI Automation Platform</p>
+  <h1>Your workflows,<br/><em>orchestrated</em></h1>
+  <p class="hero-sub">Orrery connects your tools, teams, and data streams into intelligent automated workflows — built with AI, maintained without code.</p>
+
+  <div class="waitlist-wrap">
+    <div class="waitlist-form" id="hero-form-wrap">
+      <input type="email" id="hero-email" placeholder="your@email.com" autocomplete="email"/>
+      <button onclick="joinWaitlist('hero')">Reserve Your Spot</button>
+    </div>
+    <div class="success-msg" id="hero-success">
+      You're on the list. We'll be in touch soon.
+    </div>
+    <p class="waitlist-note"><span class="waitlist-count" id="count-display"></span> people already waiting</p>
+  </div>
+</section>
+
+<div class="divider">
+  <hr/><span class="divider-text">What Orrery does</span><hr/>
+</div>
+
+<!-- FEATURES -->
+<section style="padding-top: 5rem;">
+  <div class="section-inner">
+    <p class="section-label">The Platform</p>
+    <h2>Automation that <em>thinks</em> with you</h2>
+    <p class="section-desc">Most automation tools are rigid scripts waiting to break. Orrery uses AI to build workflows that adapt, self-heal, and improve over time.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <p class="feature-num">01</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="17" stroke="#C9A84C" stroke-width="1"/>
+          <path d="M10 18 L18 10 L26 18 L18 26 Z" stroke="#C9A84C" stroke-width="1" fill="none"/>
+          <circle cx="18" cy="18" r="3" fill="#C9A84C" opacity="0.6"/>
+        </svg>
+        <h3>Intelligent Routing</h3>
+        <p class="feature-desc">AI analyzes incoming data and routes tasks to the right people, tools, or systems — eliminating manual triage entirely.</p>
+      </div>
+      <div class="feature-card">
+        <p class="feature-num">02</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="8" width="34" height="20" rx="2" stroke="#C9A84C" stroke-width="1"/>
+          <path d="M8 18 L14 12 L20 18 L26 14" stroke="#C9A84C" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="26" cy="14" r="2" fill="#C9A84C" opacity="0.6"/>
+        </svg>
+        <h3>Zero-Code Workflows</h3>
+        <p class="feature-desc">Describe what you need in plain language. Orrery generates and deploys the automation — no developer required, ever.</p>
+      </div>
+      <div class="feature-card">
+        <p class="feature-num">03</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 4 L18 32" stroke="#C9A84C" stroke-width="1" opacity="0.3"/>
+          <path d="M4 18 L32 18" stroke="#C9A84C" stroke-width="1" opacity="0.3"/>
+          <circle cx="18" cy="18" r="6" stroke="#C9A84C" stroke-width="1"/>
+          <circle cx="18" cy="18" r="14" stroke="#C9A84C" stroke-width="1" opacity="0.3"/>
+          <circle cx="18" cy="4" r="2" fill="#C9A84C" opacity="0.7"/>
+        </svg>
+        <h3>Live Observability</h3>
+        <p class="feature-desc">Watch every workflow run in real time. Full audit trails, error surfacing, and performance metrics — in one unified view.</p>
+      </div>
+      <div class="feature-card">
+        <p class="feature-num">04</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="28" height="28" rx="14" stroke="#C9A84C" stroke-width="1"/>
+          <path d="M12 18 L16 22 L24 14" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Self-Healing Automations</h3>
+        <p class="feature-desc">When a step fails, Orrery detects it, diagnoses the cause, and retries with corrections — automatically, without human intervention.</p>
+      </div>
+      <div class="feature-card">
+        <p class="feature-num">05</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="10" width="10" height="16" rx="1" stroke="#C9A84C" stroke-width="1"/>
+          <rect x="22" y="10" width="10" height="16" rx="1" stroke="#C9A84C" stroke-width="1"/>
+          <path d="M14 18 L22 18" stroke="#C9A84C" stroke-width="1" stroke-dasharray="2 2"/>
+        </svg>
+        <h3>Universal Integrations</h3>
+        <p class="feature-desc">Connect to 200+ tools on day one — Salesforce, Notion, Slack, Postgres, REST APIs, webhooks, and more. No middleware needed.</p>
+      </div>
+      <div class="feature-card">
+        <p class="feature-num">06</p>
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 10 L28 10 L28 22 L20 22 L16 28 L16 22 L8 22 Z" stroke="#C9A84C" stroke-width="1" fill="none" stroke-linejoin="round"/>
+          <circle cx="14" cy="16" r="1.5" fill="#C9A84C" opacity="0.6"/>
+          <circle cx="18" cy="16" r="1.5" fill="#C9A84C" opacity="0.6"/>
+          <circle cx="22" cy="16" r="1.5" fill="#C9A84C" opacity="0.6"/>
+        </svg>
+        <h3>AI Copilot</h3>
+        <p class="feature-desc">An always-on assistant that helps you build, debug, and optimize your workflows. Just ask it what you want to change.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section" style="padding: 0;">
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-num">10<span>×</span></div>
+      <div class="stat-label">Faster to Deploy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">200<span>+</span></div>
+      <div class="stat-label">Native Integrations</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">99<span>.9%</span></div>
+      <div class="stat-label">Uptime SLA</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Lines of Code Required</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner" style="max-width: 800px;">
+    <p class="section-label">How it works</p>
+    <h2>From idea to <em>automation</em> in minutes</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Describe your process</h3>
+          <p>Tell Orrery what you want to automate in plain English. It asks the right clarifying questions and builds a workflow plan for your approval.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Connect your tools</h3>
+          <p>Authorize your existing apps in seconds. Orrery handles OAuth, API keys, and credential management — securely, in one place.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Review and launch</h3>
+          <p>Preview each step, test with live data, and deploy with one click. Your automation runs continuously from that moment on.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Improve over time</h3>
+          <p>Orrery monitors performance, surfaces insights, and suggests optimizations. Your automations get smarter the longer they run.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section style="padding-top: 0;">
+  <div class="section-inner">
+    <p class="section-label">Use Cases</p>
+    <h2>Built for <em>every</em> team</h2>
+
+    <div class="use-cases">
+      <div class="use-case">
+        <div class="use-case-icon">◆</div>
+        <h4>Revenue Operations</h4>
+        <p>Automate lead routing, CRM updates, and pipeline reporting across your entire sales stack.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">◈</div>
+        <h4>Customer Success</h4>
+        <p>Trigger onboarding flows, health score alerts, and renewal reminders without writing a line of code.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">◇</div>
+        <h4>Finance & Ops</h4>
+        <p>Reconcile invoices, generate reports, and sync data across ERPs and spreadsheets automatically.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">◉</div>
+        <h4>HR & People Ops</h4>
+        <p>Streamline hiring workflows, onboarding checklists, and employee data across all your HR tools.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">○</div>
+        <h4>Engineering</h4>
+        <p>Automate incident response, deploy notifications, code review assignments, and release workflows.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">◎</div>
+        <h4>Marketing</h4>
+        <p>Sync campaign data, trigger nurture sequences, and keep your analytics stack consistent and current.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section" id="waitlist-bottom">
+  <p class="eyebrow" style="animation: none; opacity: 1;">Early Access</p>
+  <h2 style="margin: 0 auto 1rem; text-align: center;">Be among the <em>first</em></h2>
+  <p class="section-desc" style="text-align: center; margin: 0 auto 2.5rem;">We're opening Orrery to a small group of teams first. Join the waitlist and we'll reach out when your spot is ready.</p>
+
+  <div style="max-width: 460px; margin: 0 auto;">
+    <div class="waitlist-form" id="bottom-form-wrap">
+      <input type="email" id="bottom-email" placeholder="your@email.com" autocomplete="email"/>
+      <button onclick="joinWaitlist('bottom')">Get Early Access</button>
+    </div>
+    <div class="success-msg" id="bottom-success">
+      You're on the list. We'll be in touch soon.
+    </div>
+    <p class="waitlist-note" style="text-align:center; margin-top: 0.75rem;">No spam. No credit card. Cancel anytime.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Orrery<span>.</span></div>
+  <p>© 2025 Orrery, Inc. — AI Automation Platform</p>
+  <p style="font-size: 0.7rem; color: var(--muted);">hello@orrery.ai</p>
+</footer>
+
+<script>
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Storage key
+  const STORAGE_KEY = 'orrery-waitlist';
+
+  // Load and display count
+  async function loadCount() {
+    try {
+      const result = await window.storage.get(STORAGE_KEY, true);
+      const data = result ? JSON.parse(result.value) : { emails: [], count: 0 };
+      updateCountDisplay(data.count || data.emails.length || 0);
+    } catch (e) {
+      updateCountDisplay(247); // seed count if no storage
+    }
+  }
+
+  function updateCountDisplay(n) {
+    const el = document.getElementById('count-display');
+    if (el) el.textContent = (n + 247).toLocaleString();
+  }
+
+  async function joinWaitlist(form) {
+    const emailInput = document.getElementById(form === 'hero' ? 'hero-email' : 'bottom-email');
+    const email = emailInput.value.trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      emailInput.style.borderBottom = '1px solid #C9A84C';
+      emailInput.focus();
+      return;
+    }
+
+    try {
+      let data = { emails: [], count: 0 };
+      try {
+        const result = await window.storage.get(STORAGE_KEY, true);
+        if (result) data = JSON.parse(result.value);
+      } catch(e) {}
+
+      if (!data.emails.includes(email)) {
+        data.emails.push(email);
+        data.count = data.emails.length;
+        await window.storage.set(STORAGE_KEY, JSON.stringify(data), true);
+      }
+
+      // Show success
+      document.getElementById(form + '-form-wrap').style.display = 'none';
+      document.getElementById(form + '-success').style.display = 'block';
+      updateCountDisplay(data.count);
+
+    } catch(e) {
+      // Fallback if storage unavailable
+      document.getElementById(form + '-form-wrap').style.display = 'none';
+      document.getElementById(form + '-success').style.display = 'block';
+    }
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (document.activeElement === document.getElementById('hero-email')) joinWaitlist('hero');
+      if (document.activeElement === document.getElementById('bottom-email')) joinWaitlist('bottom');
+    }
+  });
+
+  loadCount();
+</script>
+</body>
+</html>
